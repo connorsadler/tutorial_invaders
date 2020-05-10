@@ -33,9 +33,6 @@ class Invader(Sprite):
     def move(self):
         self.moveForward(3)
 
-    def handleCollisions(self, collidedWithSprites):
-        pass
-
     def draw(self):
         super().draw()
 
