@@ -28,10 +28,9 @@ class Invader(Sprite):
     def __init__(self, x, y):
         super().__init__(x, y, 50,50)
         self.setImage("invader.png")
-        self.setAngle(90)
 
     def move(self):
-        self.moveForward(3)
+        self.moveBy(1, 0)
 
     def draw(self):
         super().draw()
