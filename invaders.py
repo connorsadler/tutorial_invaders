@@ -26,14 +26,18 @@ pygamehelper.initPygame()
 # 
 class Invader(Sprite):
     def __init__(self, x, y):
-        super().__init__(x, y, 50,50)
-        self.setImage("invader.png")
+        super().__init__(x, y)
+        self.setImage(["invader1.png", "invader2.png"])
 
     def move(self):
         self.moveBy(1, 0)
+        # TODO: Invader movement when it reaches edge of screen
 
-    def draw(self):
-        super().draw()
+        # Animation for Invader - every 30 game ticks, we change costume
+        if pygamehelper.gameTick % 30 == 0:
+            self.nextCostume()
+
+        # TODO: Invader dropping bombs (bullets?)
 
 #
 # A Player ship
@@ -41,17 +45,42 @@ class Invader(Sprite):
 class PlayerShip(Sprite):
     def __init__(self, x, y):
         super().__init__(x, y, 50, 50)
-        self.setAngle(90)
+
+        self.bulletCooldown = 0
 
     def move(self):
+        if self.bulletCooldown > 0:
+            self.bulletCooldown -= 1
+
         pressed = pygame.key.get_pressed()
         if pressed[K_LEFT]:
             self.moveBy(-5, 0)
         if pressed[K_RIGHT]:
             self.moveBy(5, 0)
 
+        if pressed[K_SPACE]:
+            if self.bulletCooldown == 0:
+                boundingRect = self.getBoundingRect()
+                addSprite(Bullet(boundingRect.centerx, self.y))
+                self.bulletCooldown = 50
+
     def draw(self):
         super().draw() # draws a white rectangle for this sprite
+        # TODO: PlayerShip drawing
+
+#
+# A Bullet
+# 
+class Bullet(Sprite):
+    def __init__(self, x, y):
+        super().__init__(x, y, 15, 15)
+
+    def move(self):
+        self.moveBy(0,-3)
+
+    def draw(self):
+        super().draw() # draws a white rectangle for this sprite
+        # TODO: Bullet drawing - maybe an image?
 
 
 #
@@ -66,7 +95,7 @@ class MyGameLoop(GameLoop):
         # Create any initial instances of your sprites here
         #
         pygamehelper.addSprite(Invader(50, 50))
-        pygamehelper.addSprite(PlayerShip(20, 300))
+        pygamehelper.addSprite(PlayerShip(20, 500))
 
     #
     # TODO

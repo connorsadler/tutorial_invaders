@@ -41,7 +41,8 @@ def getScreenRect():
 class Sprite():
 
     #
-    # width/height - if you plan on using an image, you can omit both of these values. The sprite's height/width will be set automatically - they'll be available in self.boundingRect
+    # width/height - If you plan on using an image, you can omit both of these values.
+    #                The sprite's height/width will be set automatically - they'll be available in self.boundingRect
     # 
     def __init__(self, x, y, width=0, height=0, imageFilenameOrFilenamesOrImageHandler = None):
         self.x = x
@@ -233,6 +234,7 @@ class Sprite():
         else:
             print("changeCostume called with no imageDrawingHelper, costumeIndex: " + str(costumeIndex))
 
+    # Changes to the next costume. If we've reached the last costume, go back to the first one
     # Only works if we have a self.imageDrawingHelper
     def nextCostume(self):
         if self.imageDrawingHelper:
