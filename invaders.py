@@ -68,11 +68,14 @@ class PlayerShip(Sprite):
         if pressed[K_SPACE]:
             if self.bulletCooldown == 0:
                 boundingRect = self.getBoundingRect()
-                addSprite(Bullet(boundingRect.centerx, self.y))
+                addSprite(Bullet(boundingRect.centerx-5, self.y-10))
                 self.bulletCooldown = 50
 
     def draw(self):
         super().draw() # draws a white rectangle for this sprite
+        boundingRect = self.getBoundingRect()
+        # Draw gun turret above white rectangle
+        drawRect((boundingRect.centerx-5,self.y,10,-10), white)
         # TODO: PlayerShip drawing
 
 #
