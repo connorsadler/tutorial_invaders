@@ -173,6 +173,10 @@ class Sprite():
     def isCollisionDetectionEnabled(self):
         return self.collisionDetectionEnabled
 
+    # If you set this to true, please override handleCollisions in your Sprite subclass
+    def setCollisionDetectionEnabled(self, collisionDetectionEnabled):
+        self.collisionDetectionEnabled = collisionDetectionEnabled
+
     def checkCollisions(self):
         collidedWithSprites = findCollisions(self)
         if len(collidedWithSprites) > 0:
@@ -205,6 +209,9 @@ class Sprite():
 
     def getBoundingRect(self):
         return self.boundingRect
+
+    def setDead(self, dead):
+        self.dead = dead
 
     def checkDead(self):
         # Simple way to kill a sprite

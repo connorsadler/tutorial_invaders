@@ -27,7 +27,9 @@ pygamehelper.initPygame()
 class Invader(Sprite):
     def __init__(self, x, y):
         super().__init__(x, y)
-        self.setImage(["invader1.png", "invader2.png"])
+        self.setImage(["images/invader1.png", "images/invader2.png"])
+
+        self.setCollisionDetectionEnabled(True)
 
     def move(self):
         self.moveBy(1, 0)
@@ -38,6 +40,11 @@ class Invader(Sprite):
             self.nextCostume()
 
         # TODO: Invader dropping bombs (bullets?)
+
+    def handleCollisions(self, collidedWithSprites):
+        for collidedWithSprite in collidedWithSprites:
+            self.setDead(True)
+            collidedWithSprite.setDead(True)
 
 #
 # A Player ship
