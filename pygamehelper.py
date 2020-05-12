@@ -241,6 +241,12 @@ class Sprite():
         else:
             print("changeCostume called with no imageDrawingHelper, costumeIndex: " + str(costumeIndex))
 
+    def getCostumeIndex(self):
+        if self.imageDrawingHelper:
+            return self.imageDrawingHelper.getCostumeIndex()
+        else:
+            print("getCostumeIndex called with no imageDrawingHelper")
+
     # Changes to the next costume. If we've reached the last costume, go back to the first one
     # Only works if we have a self.imageDrawingHelper
     def nextCostume(self):
@@ -311,11 +317,16 @@ class SpriteImageDrawingHelper():
         # This can be changed to draw with x,y as top left instead if required
         self.drawMode = DrawMode.XY_IS_CENTRE
 
+        self.imageRotated = None
+
     def setDrawMode(self, drawMode):
         self.drawMode = drawMode
 
     def changeCostume(self, costumeIndex):
         self.imageHandler.changeCostume(costumeIndex)
+
+    def getCostumeIndex(self):
+        return self.imageHandler.getCostumeIndex()
 
     def nextCostume(self):
         self.imageHandler.nextCostume()
@@ -355,6 +366,10 @@ class SpriteImageDrawingHelper():
         return result
 
     def draw(self):
+        # Sprite has just been created so moveDone has not been called - do nothing on this frame
+        if self.imageRotated == None:
+            return
+
         if self.drawMode == DrawMode.XY_IS_CENTRE:
             # draw the image, centred on x,y - so that any rotation looks good
             drawImageCentered(self.imageRotated, self.sprite.x, self.sprite.y, self.sprite.clipArea)
@@ -397,6 +412,9 @@ class ImageHandlerBase:
         # TODO: What if costumeIndex is invalid?
         self.spriteImage = self.spriteImages[costumeIndex]
         self.costumeIndex = costumeIndex
+
+    def getCostumeIndex(self):
+        return self.costumeIndex
 
     # Moves to next costume. If we have no next costume then it goes back to the first one
     def nextCostume(self):

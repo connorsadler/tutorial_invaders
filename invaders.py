@@ -45,6 +45,8 @@ class Invader(Sprite):
         for collidedWithSprite in collidedWithSprites:
             self.setDead(True)
             collidedWithSprite.setDead(True)
+            # Create Explosion
+            addSprite(Explosion(self.x, self.y))
 
 #
 # A Player ship
@@ -76,7 +78,6 @@ class PlayerShip(Sprite):
         boundingRect = self.getBoundingRect()
         # Draw gun turret above white rectangle
         drawRect((boundingRect.centerx-5,self.y,10,-10), white)
-        # TODO: PlayerShip drawing
 
 #
 # A Bullet
@@ -86,11 +87,30 @@ class Bullet(Sprite):
         super().__init__(x, y, 15, 15)
 
     def move(self):
-        self.moveBy(0,-3)
+        self.moveBy(0,-6)
 
     def draw(self):
         super().draw() # draws a white rectangle for this sprite
         # TODO: Bullet drawing - maybe an image?
+
+#
+# An Explosion
+# 
+class Explosion(Sprite):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.setImage(["images/explosion_blue_1.png", "images/explosion_blue_2.png", "images/explosion_blue_3.png"])
+
+    def move(self):
+        self.moveBy(0,0)
+        if pygamehelper.gameTick % 10 == 0:
+            if self.getCostumeIndex() < 2:
+                self.nextCostume()
+            else:
+                self.setDead(True)
+
+    def draw(self):
+        super().draw() # draws a white rectangle for this sprite
 
 
 #
@@ -115,5 +135,6 @@ class MyGameLoop(GameLoop):
     def eachFrame(self):
         pass
 
+pygamehelper.debug = False
 # Run game loop
 MyGameLoop().runGameLoop()
