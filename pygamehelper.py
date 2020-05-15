@@ -262,6 +262,12 @@ class Sprite():
     def setImage(self, imageFilenameOrFilenamesOrImageHandler):
         self.imageDrawingHelper = SpriteImageDrawingHelper(self, imageFilenameOrFilenamesOrImageHandler)
 
+    # You can pass a list of image filenames to this method
+    def setImages(self, *argv):
+        print("type of argv: " + str(type(argv)))
+        print("is list?: " + str(isinstance(argv, list)))
+        self.imageDrawingHelper = SpriteImageDrawingHelper(self, argv)
+
 #
 # This is reduced in size now and could maybe be deleted
 #

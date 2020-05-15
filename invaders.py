@@ -27,12 +27,14 @@ pygamehelper.initPygame()
 class Invader(Sprite):
     def __init__(self, x, y):
         super().__init__(x, y)
-        self.setImage(["images/invader1.png", "images/invader2.png"])
+        self.setImages(["images/invader1.png", "images/invader2.png"])
+
+        self.movex = 1
 
         self.setCollisionDetectionEnabled(True)
 
     def move(self):
-        self.moveBy(1, 0)
+        self.moveBy(self.movex, 0)
         # TODO: Invader movement when it reaches edge of screen
 
         # Animation for Invader - every 30 game ticks, we change costume
