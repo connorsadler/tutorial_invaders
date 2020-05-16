@@ -75,6 +75,9 @@ class Sprite():
         # If one of these is installed, the default "move" method must be called by the Sprite subclass
         self.moveHandler = None
 
+        # Default to drawing the sprite with the top left at x,y
+        self.drawMode = DrawMode.XY_IS_UPPER_LEFT
+
         # Optional image
         if imageFilenameOrFilenamesOrImageHandler != None:
             self.setImage(imageFilenameOrFilenamesOrImageHandler) # NOTE: Untested
@@ -139,10 +142,13 @@ class Sprite():
         if self.imageDrawingHelper:
             self.imageDrawingHelper.moveDone()
         else:
-            self.calcBoundingRect()    
+            self.calcBoundingRect()
     
     def calcBoundingRect(self):
-        self.boundingRect = pygame.Rect(self.x, self.y, self.width, self.height)
+        if self.drawMode == DrawMode.XY_IS_CENTRE:
+            self.boundingRect = calcBoundingRectCenteredOnXY(self.x, self.y, self.width, self.height)
+        else:
+            self.boundingRect = pygame.Rect(self.x, self.y, self.width, self.height)
     
     def getBoundingRect(self):
         if self.boundingRect == None:
@@ -227,10 +233,7 @@ class Sprite():
             pygame.draw.rect(gameDisplay, white, self.boundingRect)
 
     def setDrawMode(self, drawMode):
-        self.imageDrawingHelper.setDrawMode(drawMode)
-
-    def getBoundingRect(self):
-        return self.boundingRect
+        self.drawMode = drawMode
 
     def setDead(self, dead):
         self.dead = dead
@@ -251,7 +254,7 @@ class Sprite():
         pass
 
     def drawDebug(self):
-        pygame.draw.rect(gameDisplay, red, self.boundingRect, 1)
+        pygame.draw.rect(gameDisplay, red, self.getBoundingRect(), 1)
 
     def setCostume(self, costumeIndex):
         self.changeCostume(costumeIndex)
@@ -341,12 +344,10 @@ class SpriteImageDrawingHelper():
 
         # Default to drawing the sprite with the centre of it's image at x,y
         # This can be changed to draw with x,y as top left instead if required
-        self.drawMode = DrawMode.XY_IS_CENTRE
+        self.sprite.setDrawMode(DrawMode.XY_IS_CENTRE)
 
         self.imageRotated = None
 
-    def setDrawMode(self, drawMode):
-        self.drawMode = drawMode
 
     def changeCostume(self, costumeIndex):
         self.imageHandler.changeCostume(costumeIndex)
@@ -377,11 +378,7 @@ class SpriteImageDrawingHelper():
         # Not sure how important sprite.width/height are TODO: Maybe we can tidy that up?
         self.sprite.width = self.imageRotated.get_size()[0]
         self.sprite.height = self.imageRotated.get_size()[1]
-        if self.drawMode == DrawMode.XY_IS_CENTRE:
-            boundingRect = calcBoundingRectCenteredOnXY(self.sprite.x, self.sprite.y, self.sprite.width, self.sprite.height)
-        else:
-            boundingRect = pygame.Rect(self.sprite.x, self.sprite.y, self.sprite.width, self.sprite.height)
-        self.sprite.boundingRect = boundingRect
+        self.sprite.calcBoundingRect()
 
     def prepareSpriteImage(self):
         result = self.imageHandler.getSpriteImage()
@@ -396,7 +393,7 @@ class SpriteImageDrawingHelper():
         if self.imageRotated == None:
             return
 
-        if self.drawMode == DrawMode.XY_IS_CENTRE:
+        if self.sprite.drawMode == DrawMode.XY_IS_CENTRE:
             # draw the image, centred on x,y - so that any rotation looks good
             drawImageCentered(self.imageRotated, self.sprite.x, self.sprite.y, self.sprite.clipArea)
         else:
