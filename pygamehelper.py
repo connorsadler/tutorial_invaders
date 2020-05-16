@@ -291,6 +291,14 @@ class Sprite():
     def setImages(self, imageFilenames):
         self.imageDrawingHelper = SpriteImageDrawingHelper(self, imageFilenames)
 
+    # Listen for a message. When the message is received, call the method specified by "onFireHook", which must accept a single parameter "data"
+    def listenForMessage(self, messageName, onFireHook):
+        game.listenForMessage(messageName, onFireHook)
+
+    # Broadcast the message to all listeners, with the specified "data"
+    def broadcastMessage(self, messageName, data = None):
+        game.broadcastMessage(messageName, data)
+
 #
 # This is reduced in size now and could maybe be deleted
 #
@@ -1084,8 +1092,6 @@ class PathFollowMoveHandler(MoveHandler):
 # Path stuff ends
 #-----------------------------------------------------------------------------
 
-
-
 gameDisplay = None
 clock = None
 defaultFont = None
@@ -1211,14 +1217,51 @@ def moveAndDrawAllSprites():
         drawText("gameTick: " + str(gameTick), 10, display_height-30, defaultFont, white)
         drawText("sprites count: " + str(len(sprites)), 10, display_height-20, defaultFont, white)
 
+
+#-----------------------------------------------------------------------------
+# Message code
+#-----------------------------------------------------------------------------
+
+class MessageListener():
+    def __init__(self, onFireHook):
+        self.onFireHook = onFireHook
+
+    def fire(self, data):
+        self.onFireHook(data)
+
+class MessageBroker():
+    def __init__(self):
+        self.messageListeners = { }
+
+    def listenForMessage(self, messageName, onFireHook):
+        self.getMessageListeners(messageName).append(MessageListener(onFireHook))
+
+    def getMessageListeners(self, messageName):
+        if not messageName in self.messageListeners:
+            self.messageListeners[messageName] = []
+        return self.messageListeners[messageName]
+
+    def broadcastMessage(self, messageName, data):
+        if messageName in self.messageListeners:
+            for l in self.messageListeners[messageName]:
+                l.fire(data)
+
+
+
+#-----------------------------------------------------------------------------
+# Message code ends
+#-----------------------------------------------------------------------------
+
+
 #
 # Class to hold the main game loop logic
 # You should subclass this in your game, and provide an "eachFrame" method which will be called on every frame.
 # That can spawn new sprites or do other 'global' tasks.
 #
-class GameLoop():
+class GameLoop(MessageBroker):
 
     def __init__(self):
+        super().__init__()
         global game
         game = self
 
