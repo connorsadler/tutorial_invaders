@@ -140,6 +140,17 @@ class Sprite():
 
     def setMoveHandler(self, moveHandler):
         self.moveHandler = moveHandler
+    
+    def addMoveHandler(self, moveHandler):
+        if self.moveHandler:
+            if not isinstance(self.moveHandler, MoveHandlerList):
+                errorMessage = "addMoveHandler called and self.moveHandler is not a list of move handlers! This is not supported"
+                print(errorMessage)
+                raise Exception(errorMessage)
+        else:
+            self.moveHandler = MoveHandlerList()
+        
+        self.moveHandler.addMoveHandler(moveHandler)
 
     def getMoveHandler(self):
         return self.moveHandler
@@ -262,11 +273,9 @@ class Sprite():
     def setImage(self, imageFilenameOrFilenamesOrImageHandler):
         self.imageDrawingHelper = SpriteImageDrawingHelper(self, imageFilenameOrFilenamesOrImageHandler)
 
-    # You can pass a list of image filenames to this method
-    def setImages(self, *argv):
-        print("type of argv: " + str(type(argv)))
-        print("is list?: " + str(isinstance(argv, list)))
-        self.imageDrawingHelper = SpriteImageDrawingHelper(self, argv)
+    # You must specify a list of image filenames (strings)
+    def setImages(self, imageFilenames):
+        self.imageDrawingHelper = SpriteImageDrawingHelper(self, imageFilenames)
 
 #
 # This is reduced in size now and could maybe be deleted
@@ -563,6 +572,70 @@ class GetReadyMessage(Sprite):
         drawText("Get Ready", self.x - 60, self.y, pygamehelper.hugeFont, self.colour)
 
 
+#
+# Applies a shake effect to a sprite by
+# - storing it's original location
+# - on each frame, move the sprite a random point centered around it's original location
+#
+class Shake(MoveHandler):
+    def __init__(self, shakePixels = 5):
+        self.originalLocation = None
+        self.shakePixels = shakePixels
+
+    def move(self, sprite):
+        # Store original location for sprite, around which we centre the shake effect
+        if self.originalLocation == None:
+            self.originalLocation = sprite.getLocation()
+        # Move by a random amount away from the centre location each time we shake
+        rx = random.randint(-self.shakePixels, self.shakePixels)
+        ry = random.randint(-self.shakePixels, self.shakePixels)
+        sprite.setLocation(addVectors(self.originalLocation, (rx, ry)))
+
+#
+# Incrementing counter, which wraps back around to 0 instead of hitting 'countTo'
+# e.g. if countTo is 10 then we get a 'count' of
+#      0,1,2,3,4,5,6,7,8,9,0,1,2, ... etc
+#
+class CounterWithWrap:
+    def __init__(self, countTo, hookFunction = None):
+        self.countTo = countTo
+        self.count = 0
+        self.hookFunction = hookFunction
+    
+    # Increment the counter, perform the wrap if it hits the max
+    # Always return the new value of the counter
+    def tick(self):
+        self.count += 1
+        if self.count >= self.countTo:
+            if self.hookFunction:
+                self.hookFunction()
+            self.count = 0
+        return self.count
+
+#
+# Animates a sprite by changing it's costume every few frames
+# Once we have done all costumers, optionally we can kill the sprite
+#
+class AnimateCostumes(MoveHandler):
+    def __init__(self, numberOfFramesToWait, dieAfterLastCostume):
+        self.numberOfFramesToWait = numberOfFramesToWait
+        self.counter = CounterWithWrap(self.numberOfFramesToWait)
+        self.dieAfterLastCostume = dieAfterLastCostume
+
+    def move(self, sprite):
+        if self.counter.tick() == 0:
+            self.onWrap(sprite)
+
+    def onWrap(self, sprite):
+        sprite.nextCostume()
+
+        # If we reached the last costume we will have wrapped around to costume 0
+        # Optionally we can do something at this point
+        if sprite.getCostumeIndex() == 0:
+            if self.dieAfterLastCostume:
+                sprite.setDead(True)
+
+
 # Will kill the sprite if it goes off screen
 # Can be used as a Sprite edgeOfScreenChecker
 class KillSprite_EdgeOfScreenChecker():
@@ -614,6 +687,8 @@ def findSpritesByCondition(condition):
             result.append(sprite)
     return result
 
+def findSpritesByClass(classToSearchFor):
+    return findSpritesByCondition(lambda sprite : isinstance(sprite, classToSearchFor))
 
 def findCollisions(sprite):
     result = []

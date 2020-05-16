@@ -3,13 +3,16 @@ import pygamehelper
 from pygamehelper import *
 
 #
-# Starting point for a pygame game
+# Starting point for Invaders game
 # Features
-# - Easy to use a list of sprites, which gets drawn by a standard routine
-# - Easy to create your own sprite classes and add them to the list
-# - Easy to allow sprites to die and get removed from the list
-# - Game loop is in a class
+# - TODO
 #
+# TODO: Bases that you can shoot past
+#       In the first version of that you can just make bullets die when they hit a base
+#       In the more advanced version you can allow bullets to slowly destroy a base when they hit it
+
+# TODO: Invader dropping bombs (different type of bullets)
+
 
 
 # Global init
@@ -40,8 +43,6 @@ class Invader(Sprite):
         # Animation for Invader - every 30 game ticks, we change costume
         if pygamehelper.gameTick % 30 == 0:
             self.nextCostume()
-
-        # TODO: Invader dropping bombs (bullets?)
 
     def handleCollisions(self, collidedWithSprites):
         for collidedWithSprite in collidedWithSprites:
@@ -103,13 +104,20 @@ class Explosion(Sprite):
         super().__init__(x, y)
         self.setImage(["images/explosion_blue_1.png", "images/explosion_blue_2.png", "images/explosion_blue_3.png"])
 
+        self.addMoveHandler(Shake())
+        self.addMoveHandler(AnimateCostumes(15, True))
+
     def move(self):
-        self.moveBy(0,0)
-        if pygamehelper.gameTick % 10 == 0:
-            if self.getCostumeIndex() < 2:
-                self.nextCostume()
-            else:
-                self.setDead(True)
+        super().move()
+        # # TODO: Shake?
+        # #self.moveBy(random.randint(-1, 1),random.randint(-1, 1))
+        # self.moveBy(0, 0)
+
+        # if pygamehelper.gameTick % 30 == 0:
+        #     if self.getCostumeIndex() < 2:
+        #         self.nextCostume()
+        #     else:
+        #         self.setDead(True)
 
     def draw(self):
         super().draw() # draws a white rectangle for this sprite
