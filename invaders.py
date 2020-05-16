@@ -32,13 +32,16 @@ class Invader(Sprite):
         super().__init__(x, y)
         self.setImages(["images/invader1.png", "images/invader2.png"])
 
-        self.movex = 1
+        self.movex = 3
 
         self.setCollisionDetectionEnabled(True)
 
     def move(self):
         self.moveBy(self.movex, 0)
         # TODO: Invader movement when it reaches edge of screen
+        if not self.isOnScreen():
+            print("reverse at: " + str(self.getLocation()))
+            self.movex = self.movex * -1
 
         # Animation for Invader - every 30 game ticks, we change costume
         if pygamehelper.gameTick % 30 == 0:
@@ -102,25 +105,15 @@ class Bullet(Sprite):
 class Explosion(Sprite):
     def __init__(self, x, y):
         super().__init__(x, y)
-        self.setImage(["images/explosion_blue_1.png", "images/explosion_blue_2.png", "images/explosion_blue_3.png"])
-
-        self.addMoveHandler(Shake())
-        self.addMoveHandler(AnimateCostumes(15, True))
+        self.setImages(["images/explosion_blue_1.png", "images/explosion_blue_2.png", "images/explosion_blue_3.png"])
 
     def move(self):
-        super().move()
-        # # TODO: Shake?
-        # #self.moveBy(random.randint(-1, 1),random.randint(-1, 1))
-        # self.moveBy(0, 0)
+        if pygamehelper.gameTick % 15 == 0:
+            self.nextCostume()
+            if self.getCostumeIndex() == 0:
+                self.setDead(True)
 
-        # if pygamehelper.gameTick % 30 == 0:
-        #     if self.getCostumeIndex() < 2:
-        #         self.nextCostume()
-        #     else:
-        #         self.setDead(True)
-
-    def draw(self):
-        super().draw() # draws a white rectangle for this sprite
+    # No need for a 'draw' method as the Sprite class will do all that for us
 
 
 #

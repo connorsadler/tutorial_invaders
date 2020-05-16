@@ -102,6 +102,7 @@ class Sprite():
     def setLocation(self, location):
         self.x = location[0]
         self.y = location[1]
+        self.boundingRect = None
 
     def setLocationAnimated(self, location, speed = 1):
         path = Path()
@@ -118,6 +119,7 @@ class Sprite():
     def moveBy(self, xvel, yvel):
         self.x += xvel
         self.y += yvel
+        self.boundingRect = None
 
     def moveByVector(self, v):
         self.moveBy(v[0], v[1])
@@ -126,6 +128,7 @@ class Sprite():
         (dx, dy) = resolveAngle(self.angle, amount)
         self.x += dx
         self.y += dy
+        self.boundingRect = None
 
     def move(self):
         # Call moveHandler delegate if installed
@@ -136,7 +139,15 @@ class Sprite():
         if self.imageDrawingHelper:
             self.imageDrawingHelper.moveDone()
         else:
-            self.boundingRect = pygame.Rect(self.x, self.y, self.width, self.height)
+            self.calcBoundingRect()    
+    
+    def calcBoundingRect(self):
+        self.boundingRect = pygame.Rect(self.x, self.y, self.width, self.height)
+    
+    def getBoundingRect(self):
+        if self.boundingRect == None:
+            self.calcBoundingRect()
+        return self.boundingRect
 
     def setMoveHandler(self, moveHandler):
         self.moveHandler = moveHandler
@@ -156,7 +167,7 @@ class Sprite():
         return self.moveHandler
 
     def isOnScreen(self):
-        return self.boundingRect.colliderect(getScreenRect())
+        return self.getBoundingRect().colliderect(getScreenRect())
 
     # returns:
     #   2 - completely on screen
@@ -573,6 +584,9 @@ class GetReadyMessage(Sprite):
 
 
 #
+# Usage:
+#   self.addMoveHandler(Shake())
+#
 # Applies a shake effect to a sprite by
 # - storing it's original location
 # - on each frame, move the sprite a random point centered around it's original location
@@ -612,6 +626,9 @@ class CounterWithWrap:
             self.count = 0
         return self.count
 
+#
+# Usage:
+#   self.addMoveHandler(AnimateCostumes(15, True))
 #
 # Animates a sprite by changing it's costume every few frames
 # Once we have done all costumers, optionally we can kill the sprite
